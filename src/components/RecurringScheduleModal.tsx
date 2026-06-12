@@ -144,7 +144,9 @@ function ScheduleForm({
 }) {
   const { client } = useGroupSession();
   const [title, setTitle] = useState(editing?.title ?? "");
-  const [weekday, setWeekday] = useState(editing?.weekday ?? new Date().getDay());
+  const [selectedWeekdays, setSelectedWeekdays] = useState<number[]>(
+    editing ? [editing.weekday] : [new Date().getDay()],
+  );
   const [startTime, setStartTime] = useState(
     editing?.start_time?.slice(0, 5) ?? "",
   );
@@ -152,19 +154,39 @@ function ScheduleForm({
   const [location, setLocation] = useState(editing?.location ?? "");
   const [saving, setSaving] = useState(false);
 
+  function toggleWeekday(i: number) {
+    // 수정 모드는 한 행 = 한 요일 규칙이므로 단일 선택 유지
+    if (editing) {
+      setSelectedWeekdays([i]);
+      return;
+    }
+    setSelectedWeekdays((prev) =>
+      prev.includes(i)
+        ? prev.filter((d) => d !== i)
+        : [...prev, i].sort((a, b) => a - b),
+    );
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const input: ScheduleInput = {
+    if (selectedWeekdays.length === 0) return;
+    const base = {
       title: title.trim() || null,
-      weekday,
       startTime: startTime || null,
       endTime: endTime || null,
       location: location.trim() || null,
     };
     setSaving(true);
     try {
-      if (editing) await updateSchedule(client, editing.id, groupId, input);
-      else await createSchedule(client, groupId, input);
+      if (editing) {
+        const input: ScheduleInput = { ...base, weekday: selectedWeekdays[0] };
+        await updateSchedule(client, editing.id, groupId, input);
+      } else {
+        for (const weekday of selectedWeekdays) {
+          const input: ScheduleInput = { ...base, weekday };
+          await createSchedule(client, groupId, input);
+        }
+      }
       onDone();
     } finally {
       setSaving(false);
@@ -182,11 +204,11 @@ function ScheduleForm({
             <button
               key={label}
               type="button"
-              onClick={() => setWeekday(i)}
-              aria-pressed={weekday === i}
+              onClick={() => toggleWeekday(i)}
+              aria-pressed={selectedWeekdays.includes(i)}
               className={[
                 "h-11 rounded-lg text-sm font-medium transition",
-                weekday === i
+                selectedWeekdays.includes(i)
                   ? "bg-accent text-surface shadow-sm"
                   : "border border-line bg-paper text-ink-soft hover:border-line-strong hover:text-ink",
               ].join(" ")}
@@ -258,7 +280,7 @@ function ScheduleForm({
         </button>
         <button
           type="submit"
-          disabled={saving}
+          disabled={saving || selectedWeekdays.length === 0}
           className="h-12 flex-1 rounded-xl bg-accent text-base font-semibold text-surface shadow-sm transition hover:bg-accent/90 disabled:opacity-30"
         >
           {saving ? "저장 중…" : "저장"}

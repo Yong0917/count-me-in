@@ -1,26 +1,141 @@
 @import "tailwindcss";
 
+/* 알마낙 디자인 토큰 — 따뜻한 페이퍼 + 잉크.
+   순백/zinc 대신 아이보리 계열, 시맨틱은 차분한 흙빛으로 정제. */
+@theme {
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  /* 표면 — 밝고 깨끗한 쿨 뉴트럴 */
+  --color-paper: #f3f5f8; /* 배경 — 에어리한 라이트 */
+  --color-surface: #ffffff; /* 카드 — 순백 */
+  --color-overlay: #1d2530; /* 모달 백드롭 */
+
+  /* 텍스트 — 검정 대신 부드러운 슬레이트 */
+  --color-ink: #232a33; /* 본문/제목 */
+  --color-ink-soft: #5b6573; /* 보조 텍스트 */
+  --color-faint: #98a1af; /* 3차 / 플레이스홀더 */
+
+  /* 라인 */
+  --color-line: #e4e8ee;
+  --color-line-strong: #cfd6e0;
+
+  /* 강조 — 스카이 블루 (버튼·선택·주요 액션) */
+  --color-accent: #3a82c9;
+  --color-accent-soft: #e4eef8;
+
+  /* 시맨틱 — 참석/미정/불참 */
+  --color-going: #2f9e63; /* 프레시 그린 */
+  --color-going-soft: #e2f3ea;
+  --color-maybe: #c2891f; /* 앰버 */
+  --color-maybe-soft: #f6ecd6;
+  --color-skip: #d2553c; /* 클레이 레드 */
+  --color-skip-soft: #fae3dc;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  /* 한글 가독성을 위한 미세 자간 정리 */
+  letter-spacing: -0.01em;
+}
+
+/* 페이퍼 텍스처 — 그라디언트 대신 미세 노이즈로만 깊이를 준다(아주 옅게). */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
+}
+
+/* 본문 콘텐츠는 텍스처 위로 */
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* 디스플레이 세리프엔 자간을 조이지 않는다 */
+.font-display {
+  letter-spacing: -0.02em;
+  font-feature-settings: "case" 1;
+}
+
+/* 모노 숫자는 항상 폭 고정 */
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 폼 요소가 페이퍼 톤을 따라가도록 */
+input,
+button,
+textarea {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+/* ── 마이크로 인터랙션 ─────────────────────────────
+   가벼운 CSS-only 모션. 페이지 로드 리빌 + 모달 진입. */
+@keyframes cmi-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes cmi-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cmi-sheet {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.anim-fade {
+  animation: cmi-fade 0.2s ease-out both;
+}
+
+.anim-rise {
+  animation: cmi-rise 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-sheet {
+  animation: cmi-sheet 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* 접근성: 모션 감소 선호 시 전부 정지 */
+@media (prefers-reduced-motion: reduce) {
+  .anim-fade,
+  .anim-rise,
+  .anim-sheet {
+    animation: none;
+  }
 }

@@ -1,65 +1,80 @@
-import Image from "next/image";
+"use client";
 
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useState } from "react";
+
+// 랜딩 = 코드 입장 화면 (PRD F2 진입 경로 ①). 코드 입력 → /{join_code} 로 이동.
 export default function Home() {
+  const router = useRouter();
+  const [code, setCode] = useState("");
+
+  function handleEnter(e: React.FormEvent) {
+    e.preventDefault();
+    const normalized = code.trim().toUpperCase();
+    if (!normalized) return;
+    router.push(`/${normalized}`);
+  }
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <main className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center gap-12 px-6 py-16">
+      <header className="anim-rise text-center">
+        <p className="font-mono text-[11px] uppercase tracking-[0.35em] text-faint">
+          모임 참석 공유
+        </p>
+        <h1 className="mt-4 font-display text-5xl font-semibold leading-none tracking-tight text-ink">
+          count
+          <br />
+          <span className="italic text-accent">me</span> in
+        </h1>
+        <p className="mx-auto mt-5 max-w-[16rem] text-sm leading-relaxed text-ink-soft">
+          참가 코드 하나로 모여, 달력에서 오늘 누가 오는지 확인하세요.
+        </p>
+      </header>
+
+      <form
+        onSubmit={handleEnter}
+        className="anim-rise flex flex-col gap-3"
+        style={{ animationDelay: "0.08s" }}
+      >
+        <label
+          htmlFor="join-code"
+          className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft"
+        >
+          참가 코드
+        </label>
+        <input
+          id="join-code"
+          value={code}
+          onChange={(e) => setCode(e.target.value.toUpperCase())}
+          placeholder="ABC234"
+          autoCapitalize="characters"
+          autoComplete="off"
+          maxLength={6}
+          className="h-14 rounded-xl border border-line bg-surface text-center font-mono text-2xl tracking-[0.3em] text-ink uppercase shadow-sm transition placeholder:tracking-[0.3em] placeholder:text-faint/60 focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/25"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        <button
+          type="submit"
+          disabled={!code.trim()}
+          className="h-14 rounded-xl bg-accent text-base font-semibold text-surface shadow-sm transition hover:bg-accent/90 active:scale-[0.99] disabled:opacity-30"
+        >
+          입장하기
+        </button>
+      </form>
+
+      <div
+        className="anim-rise flex items-center justify-center gap-3 text-sm text-ink-soft"
+        style={{ animationDelay: "0.16s" }}
+      >
+        <span className="h-px w-8 bg-line-strong" />
+        <span>처음이신가요?</span>
+        <Link
+          href="/new"
+          className="font-semibold text-ink underline decoration-line-strong decoration-2 underline-offset-4 transition hover:decoration-accent"
+        >
+          새 그룹 만들기
+        </Link>
+      </div>
+    </main>
   );
 }

@@ -43,7 +43,6 @@ export default function GroupPage({
           setState({ phase: "invalid" });
           return;
         }
-        addRecentGroup({ groupId: group.id, groupName: group.name, joinCode });
         const client = createScopedClient(group.share_token);
         const members = await listMembers(client, group.id);
         if (!active) return;
@@ -52,11 +51,13 @@ export default function GroupPage({
         const stored = storedId
           ? members.find((m) => m.id === storedId)
           : undefined;
-        setState(
-          stored
-            ? { phase: "home", group, member: stored }
-            : { phase: "gate", group, members },
-        );
+        if (stored) {
+          // 자동 재진입도 실제 입장이므로 최근 모임에 기록(이름 미선택 이탈은 제외).
+          addRecentGroup({ groupId: group.id, groupName: group.name, joinCode });
+          setState({ phase: "home", group, member: stored });
+        } else {
+          setState({ phase: "gate", group, members });
+        }
       } catch {
         if (active) setState({ phase: "error" });
       }
@@ -72,10 +73,15 @@ export default function GroupPage({
       setState((prev) => {
         if (prev.phase !== "gate") return prev;
         storeMemberId(prev.group.id, member.id);
+        addRecentGroup({
+          groupId: prev.group.id,
+          groupName: prev.group.name,
+          joinCode,
+        });
         return { phase: "home", group: prev.group, member };
       });
     },
-    [],
+    [joinCode],
   );
 
   // "나 아니에요" → 저장 초기화 후 명단 다시 받아 게이트로.

@@ -32,13 +32,18 @@ function formatTimeRange(
   return end ? `${s}–${end.slice(0, 5)}` : s;
 }
 
+// 타임존 Asia/Seoul 고정(PRD 13장 가정) — 접속 위치와 무관하게 동일 시각 표기.
 function formatCommentTime(iso: string): string {
-  const d = new Date(iso);
-  const mm = String(d.getMonth() + 1);
-  const dd = String(d.getDate());
-  const hh = String(d.getHours()).padStart(2, "0");
-  const mi = String(d.getMinutes()).padStart(2, "0");
-  return `${mm}/${dd} ${hh}:${mi}`;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Seoul",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(new Date(iso));
+  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
+  return `${get("month")}/${get("day")} ${get("hour")}:${get("minute")}`;
 }
 
 export default function EventCard({

@@ -17,6 +17,7 @@ export interface Member {
   group_id: string;
   name: string;
   color: string | null; // 달력/명단 식별용 색상
+  active: boolean; // false 면 비활성화(보존) — 명단/달력에서 숨김
   created_at: string;
 }
 

@@ -15,3 +15,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: { persistSession: false },
 });
+
+// 그룹 입장 후 사용하는 클라이언트. RLS 가 x-share-token 헤더로 그룹을 스코프한다
+// (supabase/migrations/0005_share_token_rls.sql).
+export function createScopedClient(shareToken: string) {
+  return createClient(supabaseUrl!, supabaseAnonKey!, {
+    auth: { persistSession: false },
+    global: { headers: { "x-share-token": shareToken } },
+  });
+}

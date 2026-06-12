@@ -20,6 +20,7 @@ import { setAttendance } from "@/lib/attendances";
 import { addComment } from "@/lib/comments";
 import { listMembers } from "@/lib/members";
 import { listSchedules } from "@/lib/recurringSchedules";
+import { updateRecentGroupName } from "@/lib/recentGroups";
 import { useGroupSession } from "@/lib/groupSession";
 import {
   type CardOccurrence,
@@ -318,7 +319,10 @@ export default function CalendarHome({
           groupName={groupName}
           members={members}
           onClose={() => setSettingsOpen(false)}
-          onGroupRenamed={setGroupName}
+          onGroupRenamed={(name) => {
+            setGroupName(name);
+            updateRecentGroupName(groupId, name);
+          }}
           onMembersChanged={refetchMembers}
         />
       )}

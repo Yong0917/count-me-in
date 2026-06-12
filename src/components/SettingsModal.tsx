@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import type { Member } from "@/lib/supabase/types";
 import { updateGroupName } from "@/lib/groups";
 import { updateMemberName, deactivateMember } from "@/lib/members";
@@ -95,6 +96,15 @@ export default function SettingsModal({
               <span className="truncate text-sm text-ink-soft">{shareUrl}</span>
               <CopyButton value={shareUrl} label="링크 복사" />
             </div>
+          </section>
+
+          <section className="border-t border-line pt-5">
+            <Link
+              href="/"
+              className="flex h-12 w-full items-center justify-center rounded-xl border border-line-strong text-sm font-semibold text-ink-soft transition hover:border-accent hover:text-ink"
+            >
+              처음으로 (다른 모임 입장)
+            </Link>
           </section>
         </div>
       </div>

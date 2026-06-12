@@ -3,11 +3,13 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
+import { removeRecentGroup, useRecentGroups } from "@/lib/recentGroups";
 
 // 랜딩 = 코드 입장 화면 (PRD F2 진입 경로 ①). 코드 입력 → /{join_code} 로 이동.
 export default function Home() {
   const router = useRouter();
   const [code, setCode] = useState("");
+  const recents = useRecentGroups();
 
   function handleEnter(e: React.FormEvent) {
     e.preventDefault();
@@ -61,6 +63,41 @@ export default function Home() {
           입장하기
         </button>
       </form>
+
+      {recents.length > 0 && (
+        <section
+          className="anim-rise flex flex-col gap-3"
+          style={{ animationDelay: "0.12s" }}
+        >
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-ink-soft">
+            최근 모임
+          </p>
+          <ul className="flex flex-col gap-2">
+            {recents.map((g) => (
+              <li key={g.groupId} className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/${g.joinCode}`)}
+                  className="group flex h-14 flex-1 items-center justify-between rounded-xl border border-line bg-surface px-5 text-base font-medium text-ink shadow-sm transition hover:border-accent hover:shadow-md active:scale-[0.99]"
+                >
+                  <span className="truncate">{g.groupName}</span>
+                  <span className="font-mono text-ink-soft opacity-0 transition group-hover:opacity-100">
+                    →
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => removeRecentGroup(g.groupId)}
+                  aria-label="최근 모임에서 삭제"
+                  className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-line text-faint transition hover:border-skip hover:text-skip"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <div
         className="anim-rise flex items-center justify-center gap-3 text-sm text-ink-soft"

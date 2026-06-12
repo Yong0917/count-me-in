@@ -10,6 +10,7 @@ import {
   getStoredMemberId,
   storeMemberId,
 } from "@/lib/identity";
+import { addRecentGroup } from "@/lib/recentGroups";
 import type { Member } from "@/lib/supabase/types";
 import { GroupSessionProvider } from "@/lib/groupSession";
 import NameGate from "@/components/NameGate";
@@ -42,6 +43,7 @@ export default function GroupPage({
           setState({ phase: "invalid" });
           return;
         }
+        addRecentGroup({ groupId: group.id, groupName: group.name, joinCode });
         const client = createScopedClient(group.share_token);
         const members = await listMembers(client, group.id);
         if (!active) return;

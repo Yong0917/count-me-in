@@ -109,8 +109,8 @@ export default function CalendarHome({
   );
 
   const markers = useMemo(
-    () => buildMarkers(visibleDates, events, schedules, members.length),
-    [visibleDates, events, schedules, members.length],
+    () => buildMarkers(visibleDates, events, schedules, members),
+    [visibleDates, events, schedules, members],
   );
 
   const selectedOccurrences = useMemo(
@@ -140,27 +140,35 @@ export default function CalendarHome({
         });
         return;
       }
-      // 가상: 첫 참석 → Lazy materialize 후 저장.
-      const ev = await materializeRecurringEvent(
-        client,
-        occ.scheduleId!,
-        occ.date,
-      );
-      await setAttendance(client, ev.id, memberId, status);
-      await refetchEvents();
+      // 가상: 첫 참석 → Lazy materialize 후 저장. 실패 시 재조회로 상태 복구.
+      try {
+        const ev = await materializeRecurringEvent(
+          client,
+          occ.scheduleId!,
+          occ.date,
+        );
+        await setAttendance(client, ev.id, memberId, status);
+        await refetchEvents();
+      } catch {
+        await refetchEvents();
+      }
     },
     [client, refetchEvents],
   );
 
-  // 메모: 가상이면 먼저 materialize.
+  // 메모: 가상이면 먼저 materialize. 실패 시 재조회로 상태 복구.
   const handleAddComment = useCallback(
     async (occ: CardOccurrence, body: string) => {
-      const eventId = occ.eventId
-        ? occ.eventId
-        : (await materializeRecurringEvent(client, occ.scheduleId!, occ.date))
-            .id;
-      await addComment(client, eventId, member.id, body);
-      await refetchEvents();
+      try {
+        const eventId = occ.eventId
+          ? occ.eventId
+          : (await materializeRecurringEvent(client, occ.scheduleId!, occ.date))
+              .id;
+        await addComment(client, eventId, member.id, body);
+        await refetchEvents();
+      } catch {
+        await refetchEvents();
+      }
     },
     [client, member.id, refetchEvents],
   );

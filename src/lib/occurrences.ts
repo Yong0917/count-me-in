@@ -4,7 +4,7 @@ import type {
   CommentLite,
   EventWithDetails,
 } from "@/lib/events";
-import type { RecurringSchedule } from "@/lib/supabase/types";
+import type { Member, RecurringSchedule } from "@/lib/supabase/types";
 import type { DayMarker } from "@/components/MonthCalendar";
 
 // 정기/비정기를 한 화면에서 다루기 위한 통합 occurrence 뷰모델 (PRD F3·F6).
@@ -97,9 +97,12 @@ export function buildMarkers(
   dates: string[],
   events: EventWithDetails[],
   schedules: RecurringSchedule[],
-  totalMembers: number,
+  members: Member[],
 ): Map<string, DayMarker> {
-  // 날짜별 going 멤버 합집합 (실제 행 기준).
+  // 비활성 멤버의 attendance 는 보존되지만 집계/명단에서는 제외한다(EventCard 와 일관).
+  const activeIds = new Set(members.map((m) => m.id));
+
+  // 날짜별 going 멤버 합집합 (실제 행 기준, 활성 멤버만).
   const goingByDate = new Map<string, Set<string>>();
   const datesWithReal = new Set<string>();
   for (const ev of events) {
@@ -110,7 +113,8 @@ export function buildMarkers(
       goingByDate.set(ev.event_date, set);
     }
     for (const a of ev.attendances) {
-      if (a.status === "going") set.add(a.member_id);
+      if (a.status === "going" && activeIds.has(a.member_id))
+        set.add(a.member_id);
     }
   }
 
@@ -125,7 +129,7 @@ export function buildMarkers(
     if (!hasEvent) continue;
     markers.set(date, {
       going: goingByDate.get(date)?.size ?? 0,
-      total: totalMembers,
+      total: members.length,
     });
   }
   return markers;

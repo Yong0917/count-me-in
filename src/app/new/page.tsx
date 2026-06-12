@@ -122,7 +122,6 @@ export default function NewGroupPage() {
       </form>
 
       <div className="flex items-center justify-center gap-3 text-sm text-ink-soft">
-        <span className="h-px w-8 bg-line-strong" />
         <Link
           href="/"
           className="font-semibold text-ink underline decoration-line-strong decoration-2 underline-offset-4 transition hover:decoration-accent"

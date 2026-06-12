@@ -66,7 +66,6 @@ export default function Home() {
         className="anim-rise flex items-center justify-center gap-3 text-sm text-ink-soft"
         style={{ animationDelay: "0.16s" }}
       >
-        <span className="h-px w-8 bg-line-strong" />
         <span>처음이신가요?</span>
         <Link
           href="/new"

@@ -5,6 +5,7 @@ import type { AttendanceStatus, Member } from "@/lib/supabase/types";
 import type { CardOccurrence } from "@/lib/occurrences";
 import { ATTENDANCE_META, ATTENDANCE_ORDER } from "@/lib/attendanceMeta";
 import { memberColor } from "@/lib/colors";
+import { todayYmd } from "@/lib/date";
 import AttendanceToggle from "@/components/AttendanceToggle";
 
 // 일정 카드 = 현황 패널 단위 (PRD F6/F7). 정기/비정기 통합 occurrence 를 받는다.
@@ -81,6 +82,9 @@ export default function EventCard({
   );
   const isRecurring = occurrence.source === "recurring";
 
+  // 오늘 일정 + 본인 미정 → 응답 유도 강조 (PRD 성공 지표: 전날 기준 미정 비율 ≤ 20%).
+  const needsResponse = occurrence.date === todayYmd() && myStatus === "maybe";
+
   function handleSubmitComment(e: React.FormEvent) {
     e.preventDefault();
     const body = comment.trim();
@@ -150,10 +154,24 @@ export default function EventCard({
       </div>
 
       {/* 본인 토글 */}
-      <div className="mt-4">
-        <p className="mb-2 font-mono text-[10px] uppercase tracking-[0.2em] text-faint">
-          내 참석
-        </p>
+      <div
+        className={[
+          "mt-4 rounded-xl",
+          needsResponse ? "border border-maybe/30 bg-maybe-soft p-3" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-faint">
+            내 참석
+          </p>
+          {needsResponse && (
+            <p className="text-xs font-medium text-maybe">
+              오늘 참석 여부를 알려주세요
+            </p>
+          )}
+        </div>
         <AttendanceToggle
           value={myStatus}
           onChange={(status) =>

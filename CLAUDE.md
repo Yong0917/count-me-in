@@ -36,16 +36,21 @@ npm run lint    # ESLint (eslint-config-next, core-web-vitals + typescript)
 - `create_group(p_name)` — 그룹 생성 + `join_code`/`share_token` 발급. join_code 충돌 시 루프 재시도.
 - `resolve_group(p_join_code)` — join_code → share_token 매핑. IP당 10분 20회 rate limit(`0006_resolve_group_rate_limit.sql`의 `check_request` pre-request 훅, brute-force 대응).
 - `materialize_recurring_event(p_schedule_id, p_event_date)` — 정기 가상 occurrence → 실제 `events` 행 생성(Lazy materialize). 부분 고유 인덱스 + `ON CONFLICT`로 멱등. 정의: `0003_recurring.sql`, `0005_share_token_rls.sql`에서 share_token 검증 추가(요청 헤더와 schedule의 group_id 불일치 시 거부).
+- `add_member(p_group_id, p_name, p_color, p_pin)` — 신규 멤버 추가(PIN 4자리 숫자 필수). 이름 중복 시 `members_group_name_active_unique_idx` 위반(`23505`)이 그대로 전달된다. 정의: `0007_member_pin.sql`.
+- `verify_member_pin(p_member_id, p_pin)` — 명단에서 본인 선택 시 PIN 검증(`pin_hash`가 없으면 항상 true). `check_request`(0006)의 IP당 10분 20회 rate limit 대상에 포함(PIN 전수조사 방어). 정의: `0007_member_pin.sql`.
+- `set_member_pin(p_member_id, p_pin)` — 설정 화면에서 PIN 등록/변경/제거(`p_pin = null`이면 제거). 정의: `0007_member_pin.sql`.
 
 **RLS — share_token 스코프 적용 완료** (`0005_share_token_rls.sql`)
 
 - `0002_rls_and_rpc.sql`의 `dev_*`(anon 전체 접근) 정책은 제거됨. 현재는 `x-share-token` 헤더 → `private.current_group_id()`(SECURITY DEFINER, `private` 스키마는 Data API에 미노출)로 그룹을 식별해 모든 테이블을 스코프한다. `attendances`/`comments`는 `events` RLS를 통해 간접 스코프.
 - ⚠️ `check_request`(0006)의 EXECUTE 권한은 anon/authenticated에 유지해야 한다 — PostgREST가 db_pre_request 훅을 요청 역할로 호출하므로 회수 시 모든 요청이 42501로 실패한다(advisor의 SECURITY DEFINER WARN은 의도된 동작).
 
-**데이터 모델** (`supabase/migrations/0001_init.sql`, `0004_members_active.sql`, 타입: `src/lib/supabase/types.ts`)
+**데이터 모델** (`supabase/migrations/0001_init.sql`, `0004_members_active.sql`, `0007_member_pin.sql`, 타입: `src/lib/supabase/types.ts`)
 
 - `groups` → `members` / `recurring_schedules` / `events` (모두 group_id FK, ON DELETE CASCADE)
 - `members.active` — 멤버 비활성화(보존) 플래그, 기본 true. 삭제 대신 `active=false`로 명단/달력에서만 숨기고 기존 attendances/comments는 FK 그대로 보존(`deactivateMember`).
+- `members.pin_hash`/`has_pin` — 멤버별 PIN(이름 사칭 방지). `pin_hash`는 `crypt()`로 해시 저장되며 anon에 노출되지 않는다(컬럼 권한 제한). `has_pin`은 `pin_hash is not null`의 generated column으로 명단 응답에 포함되어 클라이언트가 "PIN 필요" 여부를 판단한다. 멤버 추가는 `add_member` RPC 경유만 가능(anon의 직접 insert 권한 회수).
+- `members(group_id, name) where active = true` unique index — 그룹 내 활성 멤버 닉네임 중복(trim 후 정확히 일치) 방지. 비활성화(`active=false`)된 멤버의 이름은 재사용 가능.
 - `recurring_schedules` — 정기 일정 "규칙". 요일 1개당 1행. 실제 `events` 행은 만들지 않는다.
 - `events` — 실제 일정 인스턴스. `source`가 `adhoc`(단발) 또는 `recurring`. 정기 일정은 **Lazy materialize**: 가상 occurrence로 달력에 표시하다가, 첫 참석/메모 시점에만 `events` 행을 생성한다(`source='recurring'`, `schedule_id` 연결). 동시 생성 중복은 `(group_id, schedule_id, event_date)` 고유 인덱스 + upsert로 멱등 처리.
 - `attendances` — 멤버×일정당 1행, `UNIQUE(event_id, member_id)`. 상태는 `going`/`not_going`/`maybe`(기본 maybe). 상태 변경은 upsert.

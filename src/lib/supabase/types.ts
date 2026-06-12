@@ -19,6 +19,7 @@ export interface Member {
   color: string | null; // 달력/명단 식별용 색상
   active: boolean; // false 면 비활성화(보존) — 명단/달력에서 숨김
   created_at: string;
+  has_pin: boolean; // PIN 설정 여부 — true 면 명단에서 본인 선택 시 PIN 확인
 }
 
 export interface RecurringSchedule {

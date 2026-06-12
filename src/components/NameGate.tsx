@@ -120,7 +120,7 @@ export default function NameGate({
                       onChange={(e) =>
                         setPinValue(e.target.value.replace(/\D/g, "").slice(0, 4))
                       }
-                      className="h-11 flex-1 rounded-lg border border-line bg-paper px-3 text-base tracking-[0.3em] text-ink focus:border-accent focus:outline-none"
+                      className="h-11 min-w-0 flex-1 rounded-lg border border-line bg-paper px-3 text-base tracking-[0.3em] text-ink focus:border-accent focus:outline-none"
                     />
                     <button
                       type="button"
@@ -184,7 +184,7 @@ export default function NameGate({
             inputMode="numeric"
             maxLength={4}
             autoComplete="off"
-            className="h-14 flex-1 rounded-xl border border-line bg-surface px-4 text-base tracking-[0.3em] text-ink shadow-sm transition placeholder:text-faint focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/25"
+            className="h-14 min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 text-base tracking-[0.3em] text-ink shadow-sm transition placeholder:text-faint focus:border-accent focus:outline-none focus:ring-4 focus:ring-accent/25"
           />
           <button
             type="submit"

@@ -177,7 +177,7 @@ function GroupNameField({
         onChange={(e) => setName(e.target.value)}
         maxLength={40}
         autoFocus
-        className="h-11 flex-1 rounded-xl border border-line bg-paper px-3 text-base text-ink transition focus:border-accent focus:bg-surface focus:outline-none"
+        className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 text-base text-ink transition focus:border-accent focus:bg-surface focus:outline-none"
       />
       <button
         type="button"
@@ -306,7 +306,7 @@ function MemberRow({
             onChange={(e) => setName(e.target.value)}
             maxLength={20}
             autoFocus
-            className="h-11 flex-1 rounded-xl border border-line bg-paper px-3 text-base text-ink transition focus:border-accent focus:bg-surface focus:outline-none"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 text-base text-ink transition focus:border-accent focus:bg-surface focus:outline-none"
           />
           <button
             type="button"
@@ -331,41 +331,45 @@ function MemberRow({
   if (mode === "pin") {
     return (
       <li>
-        <form onSubmit={handleSavePin} className="flex items-center gap-2">
-          <span className="shrink-0 text-sm text-ink-soft">PIN</span>
-          <input
-            value={pin}
-            onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
-            placeholder="4자리"
-            inputMode="numeric"
-            maxLength={4}
-            autoFocus
-            className="h-11 flex-1 rounded-xl border border-line bg-paper px-3 text-base tracking-[0.3em] text-ink transition focus:border-accent focus:bg-surface focus:outline-none"
-          />
-          <button
-            type="button"
-            onClick={resetToView}
-            className="h-11 shrink-0 rounded-lg border border-line-strong px-3 text-sm text-ink-soft transition hover:border-accent hover:text-ink"
-          >
-            취소
-          </button>
-          {member.has_pin && (
+        <form onSubmit={handleSavePin} className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <span className="shrink-0 text-sm text-ink-soft">PIN</span>
+            <input
+              value={pin}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 4))}
+              placeholder="4자리"
+              inputMode="numeric"
+              maxLength={4}
+              autoFocus
+              className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 text-base tracking-[0.3em] text-ink transition focus:border-accent focus:bg-surface focus:outline-none"
+            />
+          </div>
+          <div className="flex justify-end gap-2">
             <button
               type="button"
-              onClick={handleRemovePin}
-              disabled={busy}
-              className="h-11 shrink-0 rounded-lg px-2 text-sm text-skip transition hover:bg-skip-soft"
+              onClick={resetToView}
+              className="h-11 shrink-0 rounded-lg border border-line-strong px-3 text-sm text-ink-soft transition hover:border-accent hover:text-ink"
             >
-              PIN 제거
+              취소
             </button>
-          )}
-          <button
-            type="submit"
-            disabled={pin.length !== 4 || busy}
-            className="h-11 shrink-0 rounded-lg bg-accent px-4 text-sm font-semibold text-surface shadow-sm transition hover:bg-accent/90 disabled:opacity-30"
-          >
-            저장
-          </button>
+            {member.has_pin && (
+              <button
+                type="button"
+                onClick={handleRemovePin}
+                disabled={busy}
+                className="h-11 shrink-0 rounded-lg px-2 text-sm text-skip transition hover:bg-skip-soft"
+              >
+                PIN 제거
+              </button>
+            )}
+            <button
+              type="submit"
+              disabled={pin.length !== 4 || busy}
+              className="h-11 shrink-0 rounded-lg bg-accent px-4 text-sm font-semibold text-surface shadow-sm transition hover:bg-accent/90 disabled:opacity-30"
+            >
+              저장
+            </button>
+          </div>
         </form>
         {pinError && <p className="mt-1 text-sm text-skip">{pinError}</p>}
       </li>

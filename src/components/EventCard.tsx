@@ -238,7 +238,7 @@ export default function EventCard({
             onChange={(e) => setComment(e.target.value)}
             placeholder="한줄 메모 (예: 30분 늦어요)"
             maxLength={100}
-            className="h-11 flex-1 rounded-xl border border-line bg-paper px-3 text-sm text-ink transition placeholder:text-faint focus:border-accent focus:bg-surface focus:outline-none"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 text-sm text-ink transition placeholder:text-faint focus:border-accent focus:bg-surface focus:outline-none"
           />
           <button
             type="submit"

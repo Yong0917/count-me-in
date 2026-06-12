@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Hahmlet, IBM_Plex_Sans_KR, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -28,9 +28,18 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "count me in — 참석 공유",
+  title: "오늘참석해?",
   description:
     "참가 코드 하나로 모여, 달력에서 오늘 누가 오는지 확인하는 소모임 참석 공유 앱.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "오늘참석해",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#f3f5f8",
 };
 
 export default function RootLayout({

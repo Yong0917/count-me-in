@@ -27,7 +27,7 @@ export default function Home() {
         <h1 className="mt-4 font-display text-5xl font-semibold leading-none tracking-tight text-ink">
           오늘
           <br />
-          <span className="italic text-accent">참석</span>해?
+          <span className="text-accent">참석</span>해?
         </h1>
         <p className="mx-auto mt-5 max-w-[16rem] text-sm leading-relaxed text-ink-soft">
           참가 코드 하나로 모여, 달력에서 오늘 누가 오는지 확인하세요.
